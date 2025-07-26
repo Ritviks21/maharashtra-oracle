@@ -2,9 +2,8 @@ import streamlit as st
 import google.generativeai as genai
 from qiskit import QuantumCircuit
 from qiskit_aer import AerSimulator
-# We no longer need pandas or io for this interactive version
-# import pandas as pd
-# import io
+import pandas as pd
+import io
 
 # --- Part 1: Backend Functions (No changes here) ---
 def setup_api():
@@ -69,19 +68,46 @@ st.write("This tool uses a quantum-inspired simulation and generative AI to fore
 # Setup API key
 chronicler_model = setup_api()
 
-# --- NEW: Interactive Initial Conditions ---
+# --- NEW: Hybrid Initial Conditions ---
 st.sidebar.header("1. Set Initial Conditions")
-initial_rainfall = st.sidebar.slider("Annual Rainfall (mm)", 500, 2000, 950)
-initial_subsidy = st.sidebar.selectbox("Initial Subsidy Level", ['Standard', 'High'])
 
-# Define starting state based on user inputs
+# Load the historical data again
+historical_data_csv = """
+year,rainfall_mm,subsidy_level
+2022,1250,standard
+2023,890,standard
+2024,1100,high
+2025,950,standard
+"""
+df = pd.read_csv(io.StringIO(historical_data_csv))
+df['year'] = df['year'].astype(str) # Convert year to string for selectbox
+
+# Create a list of years for the dropdown, including a "Custom" option
+year_options = ['Custom'] + df['year'].tolist()
+selected_year = st.sidebar.selectbox("Select a Baseline Year or 'Custom'", year_options)
+
+# Set default values
+default_rainfall = 950
+default_subsidy_index = 0 # 'Standard'
+
+# If a specific year is chosen, update the defaults
+if selected_year != 'Custom':
+    year_data = df[df['year'] == selected_year].iloc[0]
+    default_rainfall = year_data['rainfall_mm']
+    default_subsidy_index = 1 if year_data['subsidy_level'] == 'high' else 0
+
+# Create the interactive widgets with the determined defaults
+initial_rainfall = st.sidebar.slider("Annual Rainfall (mm)", 500, 2000, default_rainfall)
+initial_subsidy = st.sidebar.selectbox("Initial Subsidy Level", ['Standard', 'High'], index=default_subsidy_index)
+
+# Define starting state based on the final values of the widgets
 initial_state = {}
-if initial_rainfall < 1000: # Using the slider value
+if initial_rainfall < 1000:
     initial_state['monsoon'] = 'Disrupted'
 else:
     initial_state['monsoon'] = 'Normal'
 
-if initial_subsidy == 'High': # Using the selectbox value
+if initial_subsidy == 'High':
     initial_state['subsidies'] = 'High'
 else:
     initial_state['subsidies'] = 'Standard'
@@ -93,10 +119,10 @@ events = {
     "Severe Drought Hits": lambda qc: qc.x(0),
     "International Trade Ban Reduces Demand": lambda qc: qc.x(3),
     "Govt. Announces New High-Subsidy Package": lambda qc: qc.x(2),
-    "No Major Event (Baseline Forecast)": lambda qc: qc.id(0) # Identity gate does nothing
+    "No Major Event (Baseline Forecast)": lambda qc: qc.id(0)
 }
 
-st.sidebar.header("2. Select a Scenario") # Renamed for clarity
+st.sidebar.header("2. Select a Scenario")
 selected_event_name = st.sidebar.selectbox("Choose a 'what if' event:", options=list(events.keys()))
 
 if st.sidebar.button("Run Oracle Simulation"):
