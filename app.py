@@ -5,7 +5,7 @@ from qiskit_aer import AerSimulator
 import pandas as pd
 import io
 
-# --- Part 1: Backend Functions (No changes here) ---
+# --- Part 1: Backend Functions ---
 def setup_api():
     try:
         GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]
@@ -15,7 +15,8 @@ def setup_api():
         st.error(f"Error setting up API key. Ensure it's in Streamlit Secrets. Error: {e}")
         return None
 
-def run_agricultural_simulation(quantum_event_gate, initial_state):
+# --- UPDATED: The simulation function now takes a LIST of gates ---
+def run_agricultural_simulation(quantum_event_gates, initial_state):
     qc = QuantumCircuit(4, 4)
     if initial_state.get('monsoon') == 'Disrupted':
         qc.x(0)
@@ -26,7 +27,11 @@ def run_agricultural_simulation(quantum_event_gate, initial_state):
     qc.cx(1, 3)
     qc.cx(2, 1)
     qc.barrier()
-    quantum_event_gate(qc)
+
+    # --- NEW: Loop through and apply all selected event gates ---
+    for gate_function in quantum_event_gates:
+        gate_function(qc)
+    
     qc.measure([0, 1, 2, 3], [0, 1, 2, 3])
     simulator = AerSimulator()
     job = simulator.run(qc, shots=1024)
@@ -34,6 +39,7 @@ def run_agricultural_simulation(quantum_event_gate, initial_state):
     return result.get_counts(qc)
 
 def generate_narrative_report(chronicler_model, event_description, simulation_results):
+    # This function remains the same
     state_mapping = {
         '0': {'Monsoon': 'Normal', 'Yield': 'Average', 'Subsidies': 'Standard', 'Demand': 'Stable'},
         '1': {'Monsoon': 'Disrupted', 'Yield': 'Poor', 'Subsidies': 'High', 'Demand': 'Volatile'}
@@ -52,9 +58,9 @@ def generate_narrative_report(chronicler_model, event_description, simulation_re
     results_as_string = "\n".join(formatted_results)
     prompt = f"""
     You are an expert economic analyst for Maharashtra.
-    **Scenario Briefing:** Our simulation started from a baseline reflecting recent history. We then introduced a major event: "{event_description}"
+    **Scenario Briefing:** Our simulation started from a baseline reflecting user-defined conditions. We then introduced this combination of events: "{event_description}"
     **Quantum Simulation Results:** Our model produced these probabilistic outcomes: {results_as_string}
-    **Your Task:** Translate these probabilities into a clear news-style report explaining the likely impact.
+    **Your Task:** Translate these probabilities into a clear news-style report. Explain the likely combined impact of these events.
     """
     response = chronicler_model.generate_content(prompt)
     return response.text
@@ -68,10 +74,9 @@ st.write("This tool uses a quantum-inspired simulation and generative AI to fore
 # Setup API key
 chronicler_model = setup_api()
 
-# --- NEW: Hybrid Initial Conditions ---
+# --- Hybrid Initial Conditions ---
 st.sidebar.header("1. Set Initial Conditions")
 
-# Load the historical data again
 historical_data_csv = """
 year,rainfall_mm,subsidy_level
 2022,1250,standard
@@ -80,27 +85,22 @@ year,rainfall_mm,subsidy_level
 2025,950,standard
 """
 df = pd.read_csv(io.StringIO(historical_data_csv))
-df['year'] = df['year'].astype(str) # Convert year to string for selectbox
+df['year'] = df['year'].astype(str)
 
-# Create a list of years for the dropdown, including a "Custom" option
 year_options = ['Custom'] + df['year'].tolist()
 selected_year = st.sidebar.selectbox("Select a Baseline Year or 'Custom'", year_options)
 
-# Set default values
 default_rainfall = 950
-default_subsidy_index = 0 # 'Standard'
+default_subsidy_index = 0
 
-# If a specific year is chosen, update the defaults
 if selected_year != 'Custom':
     year_data = df[df['year'] == selected_year].iloc[0]
     default_rainfall = year_data['rainfall_mm']
     default_subsidy_index = 1 if year_data['subsidy_level'] == 'high' else 0
 
-# Create the interactive widgets with the determined defaults
 initial_rainfall = st.sidebar.slider("Annual Rainfall (mm)", 500, 2000, default_rainfall)
 initial_subsidy = st.sidebar.selectbox("Initial Subsidy Level", ['Standard', 'High'], index=default_subsidy_index)
 
-# Define starting state based on the final values of the widgets
 initial_state = {}
 if initial_rainfall < 1000:
     initial_state['monsoon'] = 'Disrupted'
@@ -111,10 +111,8 @@ if initial_subsidy == 'High':
     initial_state['subsidies'] = 'High'
 else:
     initial_state['subsidies'] = 'Standard'
-# --- END OF NEW SECTION ---
 
-
-# Define the "what if" events for the user to choose
+# --- The "what if" events dictionary (no changes here) ---
 events = {
     "Severe Drought Hits": lambda qc: qc.x(0),
     "International Trade Ban Reduces Demand": lambda qc: qc.x(3),
@@ -122,22 +120,34 @@ events = {
     "No Major Event (Baseline Forecast)": lambda qc: qc.id(0)
 }
 
-st.sidebar.header("2. Select a Scenario")
-selected_event_name = st.sidebar.selectbox("Choose a 'what if' event:", options=list(events.keys()))
+# --- NEW: Dynamic Event System ---
+st.sidebar.header("2. Create a Crisis Scenario")
+selected_event_names = st.sidebar.multiselect(
+    "Choose one or more events:",
+    options=list(events.keys()),
+    default=["No Major Event (Baseline Forecast)"]
+)
 
 if st.sidebar.button("Run Oracle Simulation"):
     if chronicler_model:
         with st.spinner("The Oracle is consulting the quantum realm..."):
-            event_gate = events[selected_event_name]
-            simulation_results = run_agricultural_simulation(event_gate, initial_state)
+            
+            # --- NEW: Get the list of gate functions for all selected events ---
+            event_gates = [events[name] for name in selected_event_names]
+            
+            # Run the simulation with the list of gates
+            simulation_results = run_agricultural_simulation(event_gates, initial_state)
 
             st.subheader("Quantum Simulation Output")
             st.write("Probabilities of final states (Monsoon, Yield, Subsidies, Demand):")
             st.write(simulation_results)
 
         with st.spinner("The Chronicler is writing the report..."):
-            final_report = generate_narrative_report(chronicler_model, selected_event_name, simulation_results)
-            st.subheader(f"📜 Oracle's Report: {selected_event_name}")
+            # Create a nice description of the combined events for the report
+            event_description = " & ".join(selected_event_names)
+            
+            final_report = generate_narrative_report(chronicler_model, event_description, simulation_results)
+            st.subheader(f"📜 Oracle's Report: {event_description}")
             st.markdown(final_report)
     else:
         st.error("Cannot run simulation. Please check API key setup.")
