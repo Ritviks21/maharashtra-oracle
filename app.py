@@ -1,12 +1,12 @@
-
 import streamlit as st
 import google.generativeai as genai
 from qiskit import QuantumCircuit
 from qiskit_aer import AerSimulator
-import pandas as pd
-import io
+# We no longer need pandas or io for this interactive version
+# import pandas as pd
+# import io
 
-# --- Part 1: Backend Functions ---
+# --- Part 1: Backend Functions (No changes here) ---
 def setup_api():
     try:
         GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]
@@ -51,53 +51,52 @@ def generate_narrative_report(chronicler_model, event_description, simulation_re
             f"- Outcome: Monsoon={monsoon_state}, Yield={yield_state}, Subsidies={subsidy_state}, Demand={demand_state}. Probability: {probability:.1f}%"
         )
     results_as_string = "\n".join(formatted_results)
-    prompt = f'''
+    prompt = f"""
     You are an expert economic analyst for Maharashtra.
     **Scenario Briefing:** Our simulation started from a baseline reflecting recent history. We then introduced a major event: "{event_description}"
     **Quantum Simulation Results:** Our model produced these probabilistic outcomes: {results_as_string}
     **Your Task:** Translate these probabilities into a clear news-style report explaining the likely impact.
-    '''
+    """
     response = chronicler_model.generate_content(prompt)
     return response.text
 
 # --- Part 2: Streamlit User Interface ---
+
 st.set_page_config(page_title="Maharashtra Agricultural Oracle", page_icon="🔮")
 st.title("🔮 The Maharashtra Agricultural Oracle")
 st.write("This tool uses a quantum-inspired simulation and generative AI to forecast the impact of major events on the state's agriculture.")
 
+# Setup API key
 chronicler_model = setup_api()
 
-historical_data_csv = '''
-year,rainfall_mm,subsidy_level
-2022,1250,standard
-2023,890,standard
-2024,1100,high
-2025,950,standard
-'''
-df = pd.read_csv(io.StringIO(historical_data_csv))
-with st.expander("Show Most Recent Historical Data"):
-    st.write("The simulation starts from the conditions of the most recent year's data:")
-    st.dataframe(df.tail(1))
+# --- NEW: Interactive Initial Conditions ---
+st.sidebar.header("1. Set Initial Conditions")
+initial_rainfall = st.sidebar.slider("Annual Rainfall (mm)", 500, 2000, 950)
+initial_subsidy = st.sidebar.selectbox("Initial Subsidy Level", ['Standard', 'High'])
 
-latest_data = df.iloc[-1]
+# Define starting state based on user inputs
 initial_state = {}
-if latest_data['rainfall_mm'] < 1000:
+if initial_rainfall < 1000: # Using the slider value
     initial_state['monsoon'] = 'Disrupted'
 else:
     initial_state['monsoon'] = 'Normal'
-if latest_data['subsidy_level'] == 'high':
+
+if initial_subsidy == 'High': # Using the selectbox value
     initial_state['subsidies'] = 'High'
 else:
     initial_state['subsidies'] = 'Standard'
+# --- END OF NEW SECTION ---
 
+
+# Define the "what if" events for the user to choose
 events = {
     "Severe Drought Hits": lambda qc: qc.x(0),
     "International Trade Ban Reduces Demand": lambda qc: qc.x(3),
     "Govt. Announces New High-Subsidy Package": lambda qc: qc.x(2),
-    "No Major Event (Baseline Forecast)": lambda qc: qc.id(0)
+    "No Major Event (Baseline Forecast)": lambda qc: qc.id(0) # Identity gate does nothing
 }
 
-st.sidebar.header("Select a Scenario")
+st.sidebar.header("2. Select a Scenario") # Renamed for clarity
 selected_event_name = st.sidebar.selectbox("Choose a 'what if' event:", options=list(events.keys()))
 
 if st.sidebar.button("Run Oracle Simulation"):
@@ -105,8 +104,11 @@ if st.sidebar.button("Run Oracle Simulation"):
         with st.spinner("The Oracle is consulting the quantum realm..."):
             event_gate = events[selected_event_name]
             simulation_results = run_agricultural_simulation(event_gate, initial_state)
+
             st.subheader("Quantum Simulation Output")
+            st.write("Probabilities of final states (Monsoon, Yield, Subsidies, Demand):")
             st.write(simulation_results)
+
         with st.spinner("The Chronicler is writing the report..."):
             final_report = generate_narrative_report(chronicler_model, selected_event_name, simulation_results)
             st.subheader(f"📜 Oracle's Report: {selected_event_name}")
