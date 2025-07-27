@@ -34,7 +34,6 @@ def run_agricultural_simulation(quantum_event_gates, initial_state):
     result = job.result()
     return result.get_counts(qc)
 
-# --- UPDATED FUNCTION WITH NEW PROMPT ---
 def generate_narrative_report(chronicler_model, event_description, simulation_results, initial_state):
     state_mapping = {
         '0': {'Monsoon': 'Normal', 'Yield': 'Average', 'Subsidies': 'Standard', 'Demand': 'Stable'},
@@ -53,9 +52,8 @@ def generate_narrative_report(chronicler_model, event_description, simulation_re
         )
     results_as_string = "\n".join(formatted_results)
 
-    # --- THE NEW, POWERFUL STRATEGIC PROMPT ---
     prompt = f"""
-    You are "The Chronicler," a senior strategic advisor to the Maharashtra government, using a quantum simulation to forecast complex crises.
+    You are a senior strategic advisor to the Maharashtra government, using a quantum simulation to forecast complex crises.
 
     **Intelligence Briefing:**
 
@@ -85,8 +83,10 @@ def generate_narrative_report(chronicler_model, event_description, simulation_re
     return response.text
 
 # --- Part 2: Streamlit User Interface ---
-st.set_page_config(page_title="Maharashtra Agricultural Oracle", page_icon="🔮")
-st.title("🔮 The Maharashtra Agricultural Oracle")
+
+# --- UPDATED: New project name and icon ---
+st.set_page_config(page_title="The Sahyadri Strategist", page_icon="🏔️")
+st.title("🏔️ The Sahyadri Strategist")
 st.write("A strategic forecasting tool using quantum simulation and generative AI.")
 
 chronicler_model = setup_api()
@@ -138,19 +138,18 @@ selected_event_names = st.sidebar.multiselect(
     default=["No Major Event (Baseline Forecast)"]
 )
 
-if st.sidebar.button("Run Oracle Simulation"):
+if st.sidebar.button("Run Simulation"):
     if chronicler_model:
-        with st.spinner("The Oracle is consulting the quantum realm..."):
+        with st.spinner("The Strategist is consulting the quantum realm..."):
             event_gates = [events[name] for name in selected_event_names]
             simulation_results = run_agricultural_simulation(event_gates, initial_state)
             st.subheader("Quantum Simulation Output")
             st.write(simulation_results)
 
-        with st.spinner("The Chronicler is writing the strategic briefing..."):
+        with st.spinner("The AI is writing the strategic briefing..."):
             event_description = " & ".join(selected_event_names)
-            # --- Pass the initial_state to the report function ---
             final_report = generate_narrative_report(chronicler_model, event_description, simulation_results, initial_state)
-            st.subheader(f"📜 Oracle's Strategic Briefing: {event_description}")
+            st.subheader(f"📜 Strategic Briefing: {event_description}")
             st.markdown(final_report)
     else:
         st.error("Cannot run simulation. Please check API key setup.")
