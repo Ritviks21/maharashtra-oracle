@@ -30,7 +30,8 @@
 
 **Click the badge above or follow this link to interact with the live application:** [https://ritviks21-maharashtra-oracle-app-forivi.streamlit.app/](https://ritviks21-maharashtra-oracle-app-forivi.streamlit.app/)
 
-*(A GIF demonstrating the app's features will be added here soon.)*
+![Project Demo GIF]
+(https://www.veed.io/view/d2b21a67-9038-4b65-a6e8-b49523d1da53)
 
 ---
 
