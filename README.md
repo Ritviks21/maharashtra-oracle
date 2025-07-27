@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="[URL_TO_YOUR_PROJECT_BANNER.PNG]" alt="Project Banner">
+  <img src="https://github.com/Ritviks21/maharashtra-oracle/raw/main/docs/images/ChatGPT%20Image%20Jul%2027%2C%202025%2C%2005_33_02%20AM.png" alt="The Sahyadri Strategist Project Banner">
 </p>
 
-<h1 align="center">[YOUR_CHOSEN_PROJECT_NAME]</h1>
+<h1 align="center">The Sahyadri Strategist</h1>
 <p align="center">
   <i>An AGI-Powered Strategic Forecaster for Complex Agricultural Crises</i>
 </p>
@@ -30,16 +30,13 @@
 
 **Click the badge above or follow this link to interact with the live application:** [https://ritviks21-maharashtra-oracle-app-forivi.streamlit.app/](https://ritviks21-maharashtra-oracle-app-forivi.streamlit.app/)
 
-<p align="center">
-  <b>The App in Action</b><br>
-  <img src="[URL_TO_YOUR_APP_IN_ACTION.GIF]" alt="Demo GIF" width="700">
-</p>
+*(A GIF demonstrating the app's features will be added here soon.)*
 
 ---
 
 ## 📖 Project Overview
 
-**[YOUR_CHOSEN_PROJECT_NAME]** is a state-of-the-art strategic forecasting tool built to simulate the complex, cascading effects of overlapping crises on a regional agricultural system. By fusing an interactive classical model, a quantum simulation engine, and a powerful generative AI, this project moves beyond simple prediction to provide actionable, strategic advice for policymakers.
+**The Sahyadri Strategist** is a state-of-the-art strategic forecasting tool built to simulate the complex, cascading effects of overlapping crises on a regional agricultural system. By fusing an interactive classical model, a quantum simulation engine, and a powerful generative AI, this project moves beyond simple prediction to provide actionable, strategic advice for policymakers.
 
 ---
 
@@ -86,7 +83,7 @@ This final version integrated **Google's Gemini** not as a simple reporter, but 
 
 | Streamlit | Qiskit | Gemini | Python | Pandas |
 | :---: | :---: | :---: | :---: | :---: |
-| <img src="https://raw.githubusercontent.com/Ritviks21/Silicon-Sentinel/main/docs/images/Streamlit.png" width="48"> | <img src="https://raw.githubusercontent.com/Ritviks21/Silicon-Sentinel/main/docs/images/qiskit-logo.png" width="48"> | <img src="https://raw.githubusercontent.com/Ritviks21/Silicon-Sentinel/main/docs/images/Google-Gemini-AI-Logo.png" width="48"> | <img src="https://github.com/Ritviks21/Silicon-Sentinel/main/docs/images/Python.png" width="48"> | <img src="https://raw.githubusercontent.com/Ritviks21/Silicon-Sentinel/main/docs/images/pandas-logo.png" width="48"> |
+| <img src="https://github.com/Ritviks21/maharashtra-oracle/raw/main/docs/images/ChatGPT%20Image%20Jul%2027%2C%202025%2C%2005_45_17%20AM.png" width="48"> | <img src="https://github.com/Ritviks21/maharashtra-oracle/raw/main/docs/images/ChatGPT%20Image%20Jul%2027%2C%202025%2C%2005_45_50%20AM.png" width="48"> | <img src="https://github.com/Ritviks21/maharashtra-oracle/raw/main/docs/images/ChatGPT%20Image%20Jul%2027%2C%202025%2C%2005_48_43%20AM.png" width="48"> | <img src="https://github.com/Ritviks21/maharashtra-oracle/raw/main/docs/images/ChatGPT%20Image%20Jul%2027%2C%202025%2C%2005_47_24%20AM.png" width="48"> | <img src="https://github.com/Ritviks21/maharashtra-oracle/raw/main/docs/images/ChatGPT%20Image%20Jul%2027%2C%202025%2C%2005_50_44%20AM.png" width="48"> |
 
 ---
 
@@ -97,8 +94,8 @@ This final version integrated **Google's Gemini** not as a simple reporter, but 
 
 1.  **Clone the Repository**
     ```bash
-    git clone [https://github.com/your-username/your-repo-name.git](https://github.com/your-username/your-repo-name.git)
-    cd your-repo-name
+    git clone [https://github.com/Ritviks21/maharashtra-oracle.git](https://github.com/Ritviks21/maharashtra-oracle.git)
+    cd maharashtra-oracle
     ```
 
 2.  **Install Dependencies**
